@@ -175,6 +175,36 @@ it('subscribes to channels for remote stores', async () => {
   ).toEqual([])
 })
 
+it('filter works correctly if sent not all fields', async () => {
+  let client = new TestClient('10')
+  await client.connect()
+  client.log.keepActions()
+
+  let posts = createFilter(client, Post, { authorId: '1' })
+  let unbind = posts.listen(() => { })
+  await allTasks()
+
+  client.server.onChannel('posts/1', { id: '1', fields: { title: 'A', authorId: '1' }, type: 'posts/changed' })
+
+  await client.server.sendAll({ channel: 'posts/1', type: 'logux/subscribed' })
+  await client.server.sendAll({
+    fields: { title: 'A' },
+    id: '1',
+    type: 'posts/created'
+  })
+  await client.server.sendAll({
+    fields: { authorId: '1' },
+    id: '1',
+    type: 'posts/changed'
+  })
+  await allTasks()
+
+  expect(ensureLoaded(posts.get()).list).toEqual([
+    { id: '1', isLoading: false, title: 'A', authorId: '1' },
+  ])
+  unbind()
+})
+
 it('does not subscribe if server did it for client', async () => {
   let client = new TestClient('10')
   await client.connect()
