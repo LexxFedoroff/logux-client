@@ -279,13 +279,14 @@ export function createFilter(client, Template, filter = {}, opts = {}) {
               }
             } else if (checkSomeFields(action.fields)) {
               loadAndCheck(
-                Template(
-                  action.id,
-                  client,
-                  action,
-                  meta,
-                  subscribed.has(channelPrefix + action.id)
-                )
+                Template(action.id, client)
+                // Template(
+                //   action.id,
+                //   client,
+                //   action,
+                //   meta,
+                //   subscribed.has(channelPrefix + action.id)
+                // )
               )
             }
           }),
